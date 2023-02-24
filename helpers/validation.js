@@ -6,8 +6,9 @@ const postRecipeValidation = (recipe) => {
         description: Joi.string().required(),
         time: Joi.string().required(),
         portions: Joi.number().required(),
-        ingredients: Joi.string().required(),
+        ingredients: Joi.required(),
         instructions: Joi.string().required(),
+        image: Joi.required()
     }).options({ abortEarly: false });
     return JoiSchema.validate(recipe);
 }
@@ -17,7 +18,7 @@ const signupValidation = (user) => {
         name: Joi.string().min(6).required(),
         email: Joi.string().email().min(6).required(),
         password: Joi.string().min(6).required(),
-        avatar: Joi.object()
+        avatar: Joi.string()
     }).options({ abortEarly: false })
     return JoiSchema.validate(user)
 }

@@ -3,6 +3,15 @@ const { signupValidation, loginValidation } = require('../helpers/validation');
 const fs = require('fs')
 const bcrypt = require("bcrypt");
 
+const getAllUsers = async (req, res) => {
+  try {
+    const user = await User.find();
+    res.status(200).json({ success: true, data: user })
+  } catch (err) {
+    res.status(200).json({ success: false, msg: err })
+  }
+}
+
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
     const { error } = loginValidation(req.body);
@@ -17,6 +26,8 @@ const loginUser = async (req, res) => {
       return res
         .status(200)
         .json({ success: false, msg: `no user with email ${email} exists`, isLoggedIn: false });
+
+    if (!checkdUser.isAdmin) return res.status(200).json({ success: false, msg: 'you will be allowed to login as soon as your request gets approved.', isLoggedIn: true })
   
     const validPass = await bcrypt.compare(password, checkdUser.password);
     if (!validPass)
@@ -33,53 +44,89 @@ const loginUser = async (req, res) => {
   };
 
 const signupUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, avatar } = req.body;
     const { error } = signupValidation(req.body);
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-  console.log(req.file)
     if (error){
-    req.file && fs.unlinkSync(req.file.path)
+    // req.file && fs.unlinkSync(req.file.path)
     return res.status(200).json({ success: false, msg: error.details[0].message });
     }
  
     const userExist = await User.findOne({ email });
     if (userExist) {
-      req.file && fs.unlinkSync(req.file.path)
       return res.status(200).json({ success: false, msg: `${email} already exists` });
     }
     
     try {
-      if(req.file) {
         const user = new User({
           name,
           email,
           password: hashedPassword,
-          avatar: req.file.filename
+          isSuperUser: false,
+          isAdmin: false,
+          avatar
       })
   
       const newUser = await user.save()
-      res.status(200).json({ success: true, data: newUser })
-      } else {
-        const user = new User({
-          name,
-          email,
-          password: hashedPassword,
-          avatar: null
-      })
-  
-      const newUser = await user.save()
-      res.status(200).json({ success: true, data: newUser })
-      }
-        
+      res.status(200).json({ success: true, data: newUser }) 
     } catch(err) {
         res.status(200).json({ success: false, msg: err })
     }
     
 }
 
+const approveUser = async (req, res) => {
+  const { isAdmin, isSuperUser, _id } = req.body;
+
+  try {
+    let user = await User.findByIdAndUpdate(_id, {
+      isAdmin,
+      isSuperUser
+    });
+  
+    user = await User.find()
+  
+    res.status(200).json({ success: true, data: user })
+  } catch(err) {
+    res.status(200).json({ success: false, msg: err })
+  }
+
+}
+
+// const deleteUser = async (req, res) => {
+//   const { _id } = req.params;
+//   console.log(_id)
+//   try {
+//     let user = await User.findById(_id)
+//     console.log(user)
+//     user = await User.find()
+//     res.status(200).json({ success: true, data: user })
+
+//   } catch (err) {
+//     res.status(200).json({ success: false, msg: err })
+//   }
+// }
+
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+  console.log(id)
+  try {
+    let user = await User.findByIdAndDelete(id)
+    console.log(user)
+    user = await User.find()
+    res.status(200).json({ success: true, data: user })
+
+  } catch (err) {
+    res.status(200).json({ success: false, msg: err })
+  }
+}
+
 module.exports = {
     loginUser,
-    signupUser
+    signupUser,
+    getAllUsers,
+    approveUser,
+    deleteUser
 }

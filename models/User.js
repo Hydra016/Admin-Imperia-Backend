@@ -16,6 +16,14 @@ const userSchema = new mongoose.Schema({
         require: true,
         min: 6
     },
+    isSuperUser: {
+        type: Boolean,
+        require: true
+    },
+    isAdmin: {
+        type: Boolean,
+        require: true
+    },
     avatar: {
         type: String,
     }
