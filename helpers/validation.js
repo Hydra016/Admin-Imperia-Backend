@@ -8,7 +8,8 @@ const postRecipeValidation = (recipe) => {
         portions: Joi.number().required(),
         ingredients: Joi.required(),
         instructions: Joi.string().required(),
-        image: Joi.required()
+        image: Joi.required(),
+        userId: Joi.string()
     }).options({ abortEarly: false });
     return JoiSchema.validate(recipe);
 }

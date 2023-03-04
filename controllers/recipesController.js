@@ -1,6 +1,5 @@
 const Recipes = require('../models/Recipe');
 const { postRecipeValidation } = require('../helpers/validation');
-const fs = require('fs');
 
 const getAllRecipes = async (req, res) => {
     try {
@@ -13,7 +12,6 @@ const getAllRecipes = async (req, res) => {
 
 const getSingleRecipe = async (req, res) => {
     const { id } = req.params;
-    console.log(id)
     try {
         const recipe = await Recipes.findById(id);
         res.status(200).json({ success: true, data: recipe })
@@ -23,11 +21,12 @@ const getSingleRecipe = async (req, res) => {
 }
 
 const deleteRecipe = async (req, res) => {
-    const { id } = req.params;
+    const { id, userId } = req.query;
 
     try {
-        await Recipes.deleteOne({ id });
-        res.status(200).json({ success: true, msg: 'recipe deleted' })
+        let recipes = await Recipes.findByIdAndDelete(id);
+        recipes = await Recipes.find({ userId: userId });
+        res.status(200).json({ success: true, data: recipes, results: recipes.length })
     } catch (err){
         res.status(200).json({ success: false, msg: err })
     }
@@ -36,7 +35,7 @@ const deleteRecipe = async (req, res) => {
 
 const postRecipe = async (req, res) => {
     const { error } = postRecipeValidation(req.body);
-    const  { name, description, time, portions, ingredients, instructions, image } = req.body;
+    const  { name, description, time, portions, ingredients, instructions, image, userId } = req.body;
 
     if(error) {
 
@@ -55,9 +54,9 @@ const postRecipe = async (req, res) => {
         portions,
         ingredients,
         instructions,
-        image
+        image,
+        userId
     })
-
     //with multer
     // console.log(req.files)
     // if(req.files) {
@@ -72,9 +71,22 @@ const postRecipe = async (req, res) => {
     res.status(200).json({ success: true, data: newRecipe })
 }
 
+const getRecipeById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const recipe = await Recipes.find({ userId: id });
+        res.status(200).json({ success: true, data: recipe })
+    } catch(err) {
+        res.status(200).json({ success: false, msg: err })
+    }
+}
+
+
 module.exports = {
     getAllRecipes,
     postRecipe,
     getSingleRecipe,
-    deleteRecipe
+    deleteRecipe,
+    getRecipeById
 }

@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const recipeSchema = new mongoose.Schema({
+    userId: {
+        type: String,
+        require: true
+    },
     name: {
         type: String,
         require: true
@@ -28,7 +32,7 @@ const recipeSchema = new mongoose.Schema({
     image: {
         type: [String],
         require: true
-    }
+    },
 }, { timestamps: true })
 
 module.exports = mongoose.model('Recipe', recipeSchema);
