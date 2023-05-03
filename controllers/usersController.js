@@ -1,13 +1,25 @@
+require("dotenv/config");
 const User = require("../models/User");
 const { signupValidation, loginValidation } = require("../helpers/validation");
 const fs = require("fs");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-require("dotenv/config");
+
 
 const getAllUsers = async (req, res) => {
   try {
     const user = await User.find();
+    res.status(200).json({ success: true, data: user });
+  } catch (err) {
+    res.status(200).json({ success: false, msg: err });
+  }
+};
+
+const getSingleUser = async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const user = await User.findById(id);
     res.status(200).json({ success: true, data: user });
   } catch (err) {
     res.status(200).json({ success: false, msg: err });
@@ -57,8 +69,9 @@ const loginUser = async (req, res) => {
       });
 
   try {
-      const token = jwt.sign({ _id: checkdUser._id, isLoggedIn: true },  'haider1234$');
+      // const token = jwt.sign({ _id: checkdUser._id, isLoggedIn: true },  'haider1234$');
       // res.status(200).json({ success: true, data: token, isLoggedIn: true })
+      // res.header("auth-token", token).send(token)
     res.status(200).json({ success: true, data: checkdUser, isLoggedIn: true });
   } catch (err) {
     res.status(200).json({ success: false, data: err, isLoggedIn: false });
@@ -136,4 +149,5 @@ module.exports = {
   getAllUsers,
   approveUser,
   deleteUser,
+  getSingleUser
 };

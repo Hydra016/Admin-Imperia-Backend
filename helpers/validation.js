@@ -7,7 +7,7 @@ const postRecipeValidation = (recipe) => {
         time: Joi.string().required(),
         portions: Joi.number().required(),
         ingredients: Joi.required(),
-        instructions: Joi.string().required(),
+        instructions: Joi.required(),
         image: Joi.required(),
         userId: Joi.string()
     }).options({ abortEarly: false });

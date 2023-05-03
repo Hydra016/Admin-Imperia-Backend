@@ -26,7 +26,7 @@ const recipeSchema = new mongoose.Schema({
         require: true
     },
     instructions: {
-        type: String,
+        type: [String],
         require: true
     },
     image: {

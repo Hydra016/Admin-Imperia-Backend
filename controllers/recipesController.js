@@ -82,11 +82,32 @@ const getRecipeById = async (req, res) => {
     }
 }
 
+const updateRecipe = async (req, res) => {
+    const { name, description, time, portions, ingredients } = req.body;
+    const { id } = req.params
+
+    const recipe = await Recipes.updateOne({_id: id}, {
+        name,
+        description,
+        time,
+        portions,
+        ingredients
+    })
+    const newRecipe = await Recipes.find({_id: id});
+
+    try {
+        res.status(200).json({ data: newRecipe })
+    } catch (err) {
+        res.send(err)
+    }
+
+}
 
 module.exports = {
     getAllRecipes,
     postRecipe,
     getSingleRecipe,
     deleteRecipe,
-    getRecipeById
+    getRecipeById,
+    updateRecipe
 }
